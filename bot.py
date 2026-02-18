@@ -848,8 +848,11 @@ https://kr.atomy.com/category?dispCtgNo=2412002654&sortType=POPULAR
     referrer_id = result[0] if result else None
     conn.close()
     
-    # Определяем ID для заказа: если есть реферер - используем его, если нет - владельца
-    order_user_id = referrer_id if referrer_id else get_bot_owner()['user_id']
+    # ВАЖНО: Если есть реферер - передаем его ID, если нет - передаем ID владельца
+    if referrer_id:
+        order_user_id = referrer_id
+    else:
+        order_user_id = get_bot_owner()['user_id']
     
     markup = types.InlineKeyboardMarkup(row_width=1)
     btn_order = types.InlineKeyboardButton("🛒 Хочу заказать", callback_data=f"order_{order_user_id}")
@@ -858,7 +861,6 @@ https://kr.atomy.com/category?dispCtgNo=2412002654&sortType=POPULAR
     markup.add(btn_order, btn_back, btn_menu)
     
     safe_edit_message_text(call, text, markup, parse_mode="HTML")
-
 # ========== УХОД ЗА ВОЛОСАМИ ==========
 @bot.callback_query_handler(func=lambda call: call.data == "hair_care")
 def hair_care_callback(call):
@@ -884,8 +886,11 @@ https://kr.atomy.com/category?dispCtgNo=2412002657&sortType=POPULAR
     referrer_id = result[0] if result else None
     conn.close()
     
-    # Определяем ID для заказа: если есть реферер - используем его, если нет - владельца
-    order_user_id = referrer_id if referrer_id else get_bot_owner()['user_id']
+    # ВАЖНО: Если есть реферер - передаем его ID, если нет - передаем ID владельца
+    if referrer_id:
+        order_user_id = referrer_id
+    else:
+        order_user_id = get_bot_owner()['user_id']
     
     markup = types.InlineKeyboardMarkup(row_width=1)
     btn_order = types.InlineKeyboardButton("🛒 Хочу заказать", callback_data=f"order_{order_user_id}")
@@ -894,7 +899,6 @@ https://kr.atomy.com/category?dispCtgNo=2412002657&sortType=POPULAR
     markup.add(btn_order, btn_back, btn_menu)
     
     safe_edit_message_text(call, text, markup, parse_mode="HTML")
-
 # ========== УХОД ЗА КОЖЕЙ ==========
 @bot.callback_query_handler(func=lambda call: call.data == "skin_care")
 def skin_care_callback(call):
@@ -930,8 +934,11 @@ https://frata.myluuk.app/widget/v2/index.html?vendor=atomy"""
     referrer_id = result[0] if result else None
     conn.close()
     
-    # Определяем ID для заказа: если есть реферер - используем его, если нет - владельца
-    order_user_id = referrer_id if referrer_id else get_bot_owner()['user_id']
+    # ВАЖНО: Если есть реферер - передаем его ID, если нет - передаем ID владельца
+    if referrer_id:
+        order_user_id = referrer_id
+    else:
+        order_user_id = get_bot_owner()['user_id']
     
     markup = types.InlineKeyboardMarkup(row_width=1)
     btn_order = types.InlineKeyboardButton("🛒 Хочу заказать", callback_data=f"order_{order_user_id}")
@@ -940,7 +947,6 @@ https://frata.myluuk.app/widget/v2/index.html?vendor=atomy"""
     markup.add(btn_order, btn_back, btn_menu)
     
     safe_edit_message_text(call, text, markup, parse_mode="HTML")
-
 # ========== УХОД ЗА ПОЛОСТЬЮ РТА ==========
 @bot.callback_query_handler(func=lambda call: call.data == "oral_care")
 def oral_care_callback(call):
@@ -967,8 +973,11 @@ https://www.atomy.ru/category?dispCtgNo=2504003408&sortType=POPULAR"""
     referrer_id = result[0] if result else None
     conn.close()
     
-    # Определяем ID для заказа: если есть реферер - используем его, если нет - владельца
-    order_user_id = referrer_id if referrer_id else get_bot_owner()['user_id']
+    # ВАЖНО: Если есть реферер - передаем его ID, если нет - передаем ID владельца
+    if referrer_id:
+        order_user_id = referrer_id
+    else:
+        order_user_id = get_bot_owner()['user_id']
     
     markup = types.InlineKeyboardMarkup(row_width=1)
     btn_order = types.InlineKeyboardButton("🛒 Хочу заказать", callback_data=f"order_{order_user_id}")
@@ -982,14 +991,14 @@ https://www.atomy.ru/category?dispCtgNo=2504003408&sortType=POPULAR"""
 @bot.callback_query_handler(func=lambda call: call.data.startswith("order_"))
 def order_callback(call):
     try:
-        # Получаем ID владельца из callback_data
+        # Получаем ID из callback_data (это ID реферера или владельца)
         owner_id = int(call.data.split("_")[1])
     except (ValueError, IndexError):
         # Если ошибка - используем владельца бота
         owner_info = get_bot_owner()
         owner_id = owner_info['user_id']
     
-    # Получаем информацию о владельце
+    # Получаем информацию о владельце (реферере)
     owner_info = get_referrer_info(owner_id)
     
     order_text = f"""😍 <b>Отлично!</b>
@@ -1009,7 +1018,6 @@ def order_callback(call):
     markup.add(btn_back, btn_menu)
     
     safe_edit_message_text(call, order_text, markup, parse_mode="HTML")
-
 # ========== НАЗАД К ПРОДУКЦИИ ==========
 @bot.callback_query_handler(func=lambda call: call.data == "back_to_products")
 def back_to_products_callback(call):
@@ -1106,6 +1114,7 @@ if __name__ == '__main__':
             print(f"Ошибка подключения: {e}")
             time.sleep(5)
             continue
+
 
 
 
