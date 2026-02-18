@@ -1083,7 +1083,36 @@ def cmd_setowner(message):
     conn.close()
     
     bot.reply_to(message, f"✅ Вы теперь владелец бота!\nВаш ID: <code>{user_id}</code>", parse_mode="HTML")
+@bot.callback_query_handler(func=lambda call: call.data.startswith("order_"))
+def order_callback(call):
+    try:
+        # Получаем ID владельца из callback_data
+        owner_id = int(call.data.split("_")[1])
+    except (ValueError, IndexError):
+        # Если ошибка - используем владельца бота
+        owner_info = get_bot_owner()
+        owner_id = owner_info['user_id']
+    
+    # Получаем информацию о владельце
+    owner_info = get_referrer_info(owner_id)
+    
+    order_text = f"""😍 <b>Отлично!</b>
 
+Для заказа заинтересовавшей вас продукции, напиши моему владельцу напрямую: 
+
+👉 {owner_info['username']} 👈
+👤 {owner_info['full_name']}
+
+💟 С тобой очень приятно работать!
+
+👉 Если я могу тебе еще чем-то помочь, то выбирай кнопку "Обратно в меню"!"""
+
+    markup = types.InlineKeyboardMarkup()
+    btn_back = types.InlineKeyboardButton("◀️ Обратно в меню", callback_data="back_to_products")
+    btn_menu = types.InlineKeyboardButton("🏠 Главное меню", callback_data="main_menu")
+    markup.add(btn_back, btn_menu)
+    
+    safe_edit_message_text(call, order_text, markup, parse_mode="HTML")
 # ========== ЗАПУСК ==========
 if __name__ == '__main__':
     print("Бот Atomy запущен...")
@@ -1094,3 +1123,4 @@ if __name__ == '__main__':
             print(f"Ошибка подключения: {e}")
             time.sleep(5)
             continue
+
