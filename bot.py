@@ -384,20 +384,17 @@ https://vkvideo.ru/video562800842_456239019?list=ln-KRzi3J6nYZtZBCYAVt
 # ========== РАЗДЕЛ "ХОЧУ СТАТЬ ПАРТНЕРОМ" ==========
 @bot.callback_query_handler(func=lambda call: call.data == "become_partner")
 def become_partner_callback(call):
-    # Определяем, кто пригласил текущего пользователя
     user_id = call.from_user.id
 
     conn = sqlite3.connect('atomy_bot.db')
     cursor = conn.cursor()
-
-    # Находим реферера текущего пользователя
     cursor.execute('SELECT referrer_id FROM users WHERE user_id = ?', (user_id,))
     result = cursor.fetchone()
-
-    referrer_id = result[0] if result else None
     conn.close()
 
-    # Получаем информацию о реферере
+    referrer_id = result[0] if result else None
+
+    # Если есть реферер → показываем его
     if referrer_id:
         contact_info = get_referrer_info(referrer_id)
     else:
@@ -420,19 +417,12 @@ def become_partner_callback(call):
     btn = types.InlineKeyboardButton("Главное меню", callback_data="main_menu")
     markup.add(btn)
 
-    bot.edit_message_text(chat_id=call.message.chat.id,
-                          message_id=call.message.message_id,
-                          text=partner_text,
-                          reply_markup=markup)
-
-    markup = types.InlineKeyboardMarkup()
-    btn = types.InlineKeyboardButton("Главное меню", callback_data="main_menu")
-    markup.add(btn)
-
-    bot.edit_message_text(chat_id=call.message.chat.id,
-                          message_id=call.message.message_id,
-                          text=partner_text,
-                          reply_markup=markup)
+    bot.edit_message_text(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        text=partner_text,
+        reply_markup=markup
+    )
 
 
 # ========== РАЗДЕЛ "ДАВАЙ ТЫ МНЕ РАССКАЖЕШЬ" ==========
@@ -1263,6 +1253,31 @@ def order_callback(call):
 
     safe_edit_message_text(call, order_text, markup, parse_mode="HTML")
 
+@bot.callback_query_handler(func=lambda call: call.data.startswith("order_"))
+def order_callback(call):
+    referrer_id = int(call.data.split("_")[1])
+
+    contact_info = get_referrer_info(referrer_id)
+
+    order_text = f"""🛒 Отличный выбор!
+
+Чтобы оформить заказ, напишите напрямую:
+
+👉 {contact_info['username']} 👈
+👤 {contact_info['full_name']}
+
+Вам помогут подобрать продукцию и оформить заказ максимально выгодно 💙"""
+
+    markup = types.InlineKeyboardMarkup()
+    btn = types.InlineKeyboardButton("Главное меню", callback_data="main_menu")
+    markup.add(btn)
+
+    bot.edit_message_text(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        text=order_text,
+        reply_markup=markup
+    )
 
 # ========== НАЗАД К ПРОДУКЦИИ ==========
 @bot.callback_query_handler(func=lambda call: call.data == "back_to_products")
